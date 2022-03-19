@@ -1,9 +1,133 @@
-<html>
-  <body>
-    {% if name %}
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="hello.css">
+    <title>Django Playground</title>
+</head>
+
+<style>
+  body {
+    background-color: linen;
+}
+
+div {
+    display: block;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+.header_division {
+    vertical-align: top;
+    background-color: lightgreen;
+    text-align: center;
+    margin-top: 1%;
+    margin-right: 1%;
+    margin-left: 1%;
+    padding: 0.5%;
+    border: solid;
+}
+
+.table_division {
+    vertical-align: top;
+    background-color: black;
+    color: white;
+    text-align: center;
+    margin-top: 1%;
+    margin-right: 1%;
+    margin-left: 1%;
+    padding: 0.5%;
+    border: solid;
+}
+
+h1 {
+    color: maroon;
+    margin-left: 40px;
+}
+
+table, th, td {
+    border: 1px solid white;
+    border-collapse: collapse;
+}
+
+th {
+    text-align: center;
+}
+
+td {
+    text-align: left;
+}
+
+  </style>
+
+<body style="margin: 0;font-family: sans-serif;">
+
+    {% comment %} {% if name %}
     <h1>Hello {{ name }}</h1>
     {% else %}
     <h1>Hello World</h1>
-    {% endif %}
-  </body>
+    {% endif %} {% endcomment %}
+
+  <div class="header_division">
+    <h1>TABLE DATA</h1>
+
+    <a href="download_pdf">Download Invoice PDF</a>
+  </div>
+
+  <div class="table_division">
+    {% comment %} <table>
+      
+      <tr>
+        <th> id </th>
+        <th> product_title </th>
+        <th> unit_price </th>
+        <th> inventory </th>
+        <th> description </th>
+      </tr> {% endcomment %}
+
+      {% comment %} Query Data into HTML Table  {% endcomment %}
+      {% comment %} {% for product in products %}
+        <tr>
+          <td> {{product.id}} </td>
+          <td> {{product.title}} </td>
+          <td style="text-align: center"> {{product.unit_price}} </td>
+          <td style="text-align: center"> {{product.inventory}} </td>
+          <td> {{product.description}} </td>
+        </tr>
+      {% endfor %}
+      
+    </table> {% endcomment %}
+
+    {% comment %} {% for order in orders %}
+    {{ order }}
+    {% endfor %} {% endcomment %}
+
+  </div>
+  
+
+</body>
+
+
 </html>
+
+
+{% comment %} PDF -> Invoice Generation Tool
+
+ORDER == XXXX
+
+Find Order -> FULL NAME, customer_id, email, phone
+
+List of Orders
+order A
+order B
+.
+.
+order N
+
+Begin Invoice Generation ==> PDF_FILE.pdf
+
+Download Promt -> User (Send to customer_email) {% endcomment %}
+
