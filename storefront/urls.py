@@ -21,8 +21,8 @@ admin.site.site_header = 'E-Store Manager'
 admin.site.index_title = 'ADMIN CONTROL'
 
 urlpatterns = [
+    # path('', admin.site.urls),
     path('admin/', admin.site.urls),
-    # path('admin/', include('store.urls')),
     path('playground/', include('playground.urls')),
     path('__debug__/', include(debug_toolbar.urls)),
 ]

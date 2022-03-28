@@ -4,6 +4,7 @@ import zipfile
 import tempfile
 import datetime
 from reportlab.pdfgen import canvas
+from reportlab.lib.pagesizes import letter, A4
 
 from django.http import FileResponse, HttpResponse
 from django.contrib import admin, messages
@@ -189,50 +190,83 @@ class OrderAdmin(admin.ModelAdmin):
 
             return self.download_invoice(
                 request=request,
+                order_id=order.id,
                 customer_name=full_name,
-                placed_at=order_date,
+                placed_at=order_date.strftime("%d-%m-%Y"),
                 invoice_date=datetime.datetime.today().strftime("%d/%m/%Y"),
-                product_set=product_set
+                product_set=product_set,
+                grand_total=total_invoice_amount
                 )
 
 
-    def download_invoice(self, request, customer_name: str, placed_at: str, invoice_date: str, product_set):
+    def download_invoice(self, request, order_id: int, customer_name: str, 
+        placed_at: str, invoice_date: str, grand_total: float,
+        product_set):
+        
         # Create a file-like buffer to receive PDF data.
         buffer = io.BytesIO()
 
         # Create the PDF object, using the buffer as its "file."
-        p = canvas.Canvas(buffer)
+        p = canvas.Canvas(buffer, pagesize=letter)
+        width, height = letter
+        print(width, height)
+        p.setFont("Helvetica", 14)
 
         # Draw things on the PDF. Here's where the PDF generation happens.
         # See the ReportLab documentation for the full list of functionality.
-        p.drawString(100, 100, "Hello world.")
-        p.setLineWidth(.3)
-        p.setFont('Helvetica', 12)
 
-        p.drawString(30,750,'Sales Invoice')
-        p.drawString(500,750, invoice_date)
-        p.drawString(30,735,'E-Store Manager')
-        p.line(480,747,580,747)
+        x1 = 20  # Padding from left
+        y1 = height - 20  # Padding from bottom
+        p.drawString(x1, y1, 'Sales Invoice')
         
-        p.drawString(275,725,'Order Placed At:')
-        p.drawString(500,725, '26-26-2002')
-        p.line(378,723,580,723)
 
-        p.drawString(30,703,'Customer Name:')
-        p.line(120,700,580,700)
-        p.drawString(120,703,customer_name)
+        # Customer Info
+        y1 -= 40
+        p.drawString(x1, y1, f'Order ID: {order_id}')
+        p.drawString(410, y1, f"Order Date: {placed_at}")
 
-        p.drawString(30,680,'Products List:')
-        p.line(30,679,100,679)
-        # p.drawString(120,680,customer_name)
-
-        x1, x2, y1, y2 = 28, 580, 677, 677
         y1 -= 20
-        p.drawString(x1, y1, f"{'No.':<5} {'title':<100} {'unit_price':<16} {'quantity':<12} {'net_price':<16}")
+        p.drawString(x1, y1, f'Customer Name: {customer_name}')
+        
+        y1 -= 20
+        p.drawString(x1, y1, 'Contact Number: +91******6789')
+
+        y1 -= 20
+        p.drawString(x1, y1, f'Customer Email: ********{customer_name[-3:]}123@gmail.com')
+
+
+        # Adress Section
+        y1 -= 36
+        address_padding_x = 80
+        p.drawString(x1, y1, f'Address:')
+        p.drawString(address_padding_x, y1, f'69, 420th floor, Green City Appartments')
+        y1 -= 20
+        p.drawString(address_padding_x, y1, f'Vakola, Santacruz East, Mumbai, Maharashtra')
+        y1 -= 20
+        p.drawString(address_padding_x, y1, f'Mumbai - 400055')
+
+        # Add QR CODE
+        QR_PATH: str = r'C:\Users\tejas\Projects\Web Development\storefront\store\e-store-text-400px.png'
+        p.drawImage(QR_PATH, 410, y1, width=120, height=120)
+
+        # Product Chart
+        y1 -= 60
+
+        tbale_start_y = y1
+        p.line(x1 - 5, y1 + 15, width - 15, y1 + 15)
+        p.drawString(x1, y1, f"{'No.':<5} {'Title':<80} {'Unit Price':<16} {'Quantity':<12} {'Net Price':<16}")
+        p.line(x1 - 5, y1 - 5, width - 15, y1 - 5)
 
         for ii, product in enumerate(product_set, start=1):
             y1 -= 20
-            p.drawString(x1, y1, f"{ii:<5} {product.get('title'):<100} {product.get('unit_price'):<16} {product.get('quantity'):<12} {product.get('net_price'):<16}")
+            p.drawString(x1, y1, f"{ii:<5} {product.get('title'):<80}")
+            p.drawString(380, y1, str(product.get('unit_price')))
+            p.drawString(480, y1, str(product.get('quantity')))
+            p.drawString(540, y1, str(product.get('net_price')))
+            p.line(x1 - 5, y1 - 5, width - 15, y1 - 5)
+
+        y1 -= 28
+        p.drawString(410, y1, f"Grand Total:       {grand_total} INR")
 
         # Close the PDF object cleanly, and we're done.
         p.showPage()
